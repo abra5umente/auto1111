@@ -21,15 +21,17 @@ func main() {
 	if err != nil {
 		fmt.Println("No .env file found, using system environment variables.")
 	}
-	sampler := os.Getenv("SAMPLER")
-	width := os.Getenv("WIDTH")
-	height := os.Getenv("HEIGHT")
+	sampler := os.Getenv("SAMPLER_NAME")
+	scheduler := os.Getenv("SCHEDULER_NAME")
+	width := os.Getenv("IMAGE_WIDTH")
+	height := os.Getenv("IMAGE_HEIGHT")
 	steps := os.Getenv("STEPS")
 	fmt.Println("Using the following settings from .env file:")
 	fmt.Println("Sampler:", sampler)
+	fmt.Println("Scheduler:", scheduler)
+	fmt.Println("Steps:", steps)
 	fmt.Println("Width:", width)
 	fmt.Println("Height:", height)
-	fmt.Println("Steps:", steps)
 
 	// start the AUTOMATIC1111 server
 	start_auto1111()
