@@ -1,8 +1,0 @@
-SAMPLER_NAME="DPM++ 2M SDE"
-SCHEDULER_NAME="Karras"
-IMAGE_HEIGHT=1024
-IMAGE_WIDTH=1024
-CFG_SCALE=4.5
-STEPS=30
-AUTO1111_BAT="C:\\Users\\user\\auto1111\\run.bat" # change with your path
-ENVIRONMENT_BAT="C:\\Users\\user\\auto1111\\environment.bat" # change with your path
