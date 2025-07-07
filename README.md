@@ -1,6 +1,6 @@
 ## Go Auto1111 Launcher
 
-This program is a Go-based launcher for AUTOMATIC1111's Stable Diffusion WebUI. It loads configuration from a `.env` file, prints the settings, and launches the WebUI using a batch file.
+This program is a Go-based launcher for AUTOMATIC1111's Stable Diffusion WebUI. It loads configuration from a `.env` file, prints the settings, launches the Stable Diffusion Web UI, and sends an API request to create an image.
 
 ### Usage
 
@@ -13,8 +13,8 @@ This program is a Go-based launcher for AUTOMATIC1111's Stable Diffusion WebUI. 
     IMAGE_WIDTH=1024
     CFG_SCALE=4.5
     STEPS=30
-    AUTO1111_BAT="C:\\Users\\alexa\\auto1111\\run.bat"
-    ENVIRONMENT_BAT="C:\\Users\\alexa\\auto1111\\environment.bat"
+    AUTO1111_BAT="C:\\Users\\user\\auto1111\\run.bat"
+    ENVIRONMENT_BAT="C:\\Users\\user\\auto1111\\environment.bat"
     ```
     **Note:** On Windows, use double backslashes (`\\`) in all file paths in your `.env` file.
 
@@ -24,15 +24,15 @@ This program is a Go-based launcher for AUTOMATIC1111's Stable Diffusion WebUI. 
     ```
     or
     ```sh
-    go build
-    ./auto1111
+    go build -o auto1111.exe
+    ./auto1111.exe
     ```
 
 The launcher will print the loaded settings and start the AUTOMATIC1111 WebUI using the batch file specified in `AUTO1111_BAT`.
 
 ### Next Steps
 
-- The next planned feature is to pass requests to the AUTOMATIC1111 WebUI via its API, allowing for programmatic image generation and control.
+- The next planned feature is to automatically generate a prompt for you using LLM
 
 ---
 **Troubleshooting:**
