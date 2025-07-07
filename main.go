@@ -12,7 +12,10 @@ import (
 	//  "path/filepath"  // for building save paths
 	// "strconv"        // string to int/float conversions
 	// "strings"        // string manipulation
-	//  "time"           // sleeping, timestamps
+	"os/signal"
+	"syscall"
+	"time" // sleeping, timestamps
+
 	"github.com/joho/godotenv" // loading environment variables from .env file
 )
 
@@ -34,5 +37,24 @@ func main() {
 	fmt.Println("Height:", height)
 
 	// start the AUTOMATIC1111 server
+	check_auto1111()
+	if !check_auto1111() {
+		fmt.Println("auto1111 is not running, starting.")
+	}
 	start_auto1111()
+	if !check_auto1111() {
+		fmt.Println("waiting for auto1111 to be ready...")
+		for {
+			time.Sleep(2 * time.Second)
+			if check_auto1111() {
+				break
+			}
+		}
+	}
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	<-sigChan
+	fmt.Println("\nreceived exit signal, stopping auto1111...")
+	stop_auto1111()
+
 }
