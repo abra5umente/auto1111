@@ -27,5 +27,6 @@ func stop_auto1111() {
 
 	if resp.StatusCode == 200 && responseText == "Stopping." {
 		fmt.Println("auto1111 stopped successfully. (from stop_auto1111.go)")
+		os.Exit(0)
 	}
 }

@@ -1,21 +1,11 @@
 package main
 
 import (
-	// "bufio"          // for reading user input
-	// "bytes"          // for constructing POST payloads
-	// "encoding/base64" // decoding base64 image data
-	// "encoding/json"  // marshaling/unmarshaling JSON
+	"bufio" // for reading user input
 	"fmt" // printing to console
-	//  "io"             // for reading HTTP responses
-	//  "net/http"       // making HTTP requests
 	"os" // environment variables, file operations
-	//  "path/filepath"  // for building save paths
-	// "strconv"        // string to int/float conversions
-	// "strings"        // string manipulation
-	"os/signal"
-	"syscall"
+	"strings" // string manipulation
 	"time" // sleeping, timestamps
-
 	"github.com/joho/godotenv" // loading environment variables from .env file
 )
 
@@ -36,25 +26,39 @@ func main() {
 	fmt.Println("Width:", width)
 	fmt.Println("Height:", height)
 
-	// start the AUTOMATIC1111 server
-	check_auto1111()
-	if !check_auto1111() {
-		fmt.Println("auto1111 is not running, starting.")
+	// prompt user for input
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("enter your prompt (or leave empty to let the rock think for you, which will be weird):")
+	userPrompt, _ := reader.ReadString('\n')
+	userPrompt = strings.TrimSpace(userPrompt)
+
+	// build the payload
+	payload := map[string]interface{}{
+		"prompt":    userPrompt,
+		"sampler":   sampler,
+		"scheduler": scheduler,
+		"width":     width,
+		"height":    height,
+		"steps":     steps,
 	}
+
+// start the AUTOMATIC1111 server if not running
+if !check_auto1111() {
+	fmt.Println("auto1111 is not running, starting.")
 	start_auto1111()
-	if !check_auto1111() {
-		fmt.Println("waiting for auto1111 to be ready...")
-		for {
-			time.Sleep(2 * time.Second)
-			if check_auto1111() {
-				break
-			}
+	fmt.Println("waiting for auto1111 to be ready...")
+	for {
+		time.Sleep(2 * time.Second)
+		if check_auto1111() {
+			break
 		}
 	}
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-	<-sigChan
-	fmt.Println("\nreceived exit signal, stopping auto1111...")
+}
+// create the image
+if !create_image(payload) {
+	fmt.Println("something went wrong making the image, exiting.")
 	stop_auto1111()
-
+	os.Exit(1)
+}
+stop_auto1111()
 }
