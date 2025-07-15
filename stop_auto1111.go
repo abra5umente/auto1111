@@ -3,30 +3,43 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
+	"os/exec"
 	"strings"
+	"time"
 )
 
-func stop_auto1111() {
-	fmt.Println("Stopping auto1111... (from stop_auto1111.go)")
+func stop_auto1111(cmd *exec.Cmd) {
+	fmt.Println("Stopping auto1111...")
 	a1_url := "http://localhost:7860/sdapi/v1/server-stop"
-	resp, err := http.Post(a1_url, "application/json", nil)
+	_, err := http.Post(a1_url, "application/json", nil)
 	if err != nil {
 		if strings.Contains(err.Error(), "connection was forcibly closed") {
 			fmt.Println("auto1111 is shutting down (connection closed).")
 			return
 		}
-		fmt.Println("Error stopping auto1111:", err, "(from stop_auto1111.go)")
-		os.Exit(1)
+		fmt.Println("Error stopping auto1111 via API:", err)
+		fmt.Println("Attempting to terminate the process directly...")
+		if err := cmd.Process.Kill(); err != nil {
+			fmt.Println("Failed to kill process:", err)
+		} else {
+			fmt.Println("Process terminated.")
+		}
+		return
 	}
-	defer resp.Body.Close()
 
-	body := make([]byte, 1024)
-	n, _ := resp.Body.Read(body)
-	responseText := string(body[:n])
+	fmt.Println("Waiting for auto1111 to stop...")
+	for i := 0; i < 10; i++ {
+		if !check_auto1111() {
+			fmt.Println("auto1111 stopped successfully.")
+			return
+		}
+		time.Sleep(1 * time.Second)
+	}
 
-	if resp.StatusCode == 200 && responseText == "Stopping." {
-		fmt.Println("auto1111 stopped successfully. (from stop_auto1111.go)")
-		os.Exit(0)
+	fmt.Println("auto1111 did not stop gracefully. Terminating process...")
+	if err := cmd.Process.Kill(); err != nil {
+		fmt.Println("Failed to kill process:", err)
+	} else {
+		fmt.Println("Process terminated.")
 	}
 }

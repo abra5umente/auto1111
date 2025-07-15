@@ -28,11 +28,12 @@ This program is a Go-based launcher for AUTOMATIC1111's Stable Diffusion WebUI. 
     ./auto1111.exe
     ```
 
-The launcher will print the loaded settings and start the AUTOMATIC1111 WebUI using the batch file specified in `AUTO1111_BAT`.
-
-### Next Steps
-
-- The next planned feature is to automatically generate a prompt for you using LLM
+The launcher will:
+- Load your configuration settings
+- Prompt you to enter an image generation prompt
+- Start the AUTOMATIC1111 WebUI if it's not already running
+- Generate your image using the txt2img API
+- Save the generated image to your specified location
 
 ---
 **Troubleshooting:**

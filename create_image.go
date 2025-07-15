@@ -15,7 +15,7 @@ import (
 )
 
 func create_image(payload map[string]interface{}) bool {
-    fmt.Println("the thinkin' rock is now thinking about your request...")
+    fmt.Println("Generating image...")
 
     // Marshal payload to JSON
     payloadBytes, err := json.Marshal(payload)
@@ -33,7 +33,7 @@ func create_image(payload map[string]interface{}) bool {
     defer resp.Body.Close()
 
     if resp.StatusCode != 200 {
-        fmt.Printf("the rock fell over, here were its final words: %d\n", resp.StatusCode)
+        fmt.Printf("API request failed with status code: %d\n", resp.StatusCode)
         return false
     }
 
@@ -69,7 +69,7 @@ func create_image(payload map[string]interface{}) bool {
 
     // Ask user for folder
     reader := bufio.NewReader(os.Stdin)
-    fmt.Print("where should the rock put the image? (enter a folder, leave blank for current directory): ")
+    fmt.Print("Enter the output folder for the image (leave blank for current directory): ")
     userFolder, _ := reader.ReadString('\n')
     userFolder = strings.TrimSpace(userFolder)
 
