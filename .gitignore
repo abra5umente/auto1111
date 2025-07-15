@@ -28,10 +28,23 @@ Thumbs.db
 
 # Environment files
 .env
-.env
+.env.local
+.env.*.local
 
 # Logs
 *.log
 
 # Go modules
 /go.sum
+
+# Test files
+*test*
+test_*
+*_test.*
+
+# Temporary rovodev files
+tmp_rovodev_*
+*rovodev*
+
+# Agent configuration
+.agent.md
