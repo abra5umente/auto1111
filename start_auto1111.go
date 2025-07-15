@@ -5,7 +5,6 @@ import (
 	"os"            // for os.Getenv
 	"os/exec"       // starting/stopping .bat files
 	"path/filepath" // for getting directory of .bat file
-	"strings"
 
 	"github.com/joho/godotenv" // loading environment variables from .env file
 )
