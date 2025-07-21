@@ -106,6 +106,7 @@ Open [http://localhost:8000/app/](http://localhost:8000/app/) in your browser.
 | **GUI Interface**                          | 🚧 MVP shipped; polishing UI & auth next                                    |
 | **Prompt Templates (JSON import)**         | ✅ Core to new workflow                                                      |
 | **Social Features** (share prompts / PNGs) | ✅ Still on the slate                                                        |
+| **Containerisation** (Docker)              | ✅ Working on this                                                           |
 
 ---
 
