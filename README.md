@@ -1,75 +1,131 @@
-## Go Auto1111 Launcher
+# Go Auto1111 Launcher & Web GUI
 
-This program is a Go-based launcher for AUTOMATIC1111's Stable Diffusion WebUI. It loads configuration from a `.env` file, prints the settings, launches the Stable Diffusion Web UI, and sends an API request to create an image with AI-powered prompt generation and enhancement.
-
-### Usage
-
-1. **Configure your `.env` file** in the project root. Example:
-
-    ```env
-    SAMPLER_NAME="DPM++ 2M SDE"
-    SCHEDULER_NAME="Karras"
-    IMAGE_HEIGHT=1024
-    IMAGE_WIDTH=1024
-    CFG_SCALE=4.5
-    STEPS=30
-    AUTO1111_BAT="C:\\Users\\user\\auto1111\\run.bat"
-    ENVIRONMENT_BAT="C:\\Users\\user\\auto1111\\environment.bat"
-    GEMINI_API_KEY="your_gemini_api_key_here"
-    ```
-    **Note:** On Windows, use double backslashes (`\\`) in all file paths in your `.env` file.
-
-2. **Build and run the program:**
-    ```sh
-    go run .
-    ```
-    or
-    ```sh
-    go build -o auto1111.exe
-    ./auto1111.exe
-    ```
-
-### Prompt Generation Features
-
-The launcher includes AI-powered prompt generation using Google's Gemini API:
-
-- **Automatic Generation**: Press Enter when prompted to generate a completely new creative prompt
-- **Prompt Enhancement**: Type your basic idea (e.g., "a cat") and the AI will enhance it with artistic style, lighting, and quality terms
-- **Examples**:
-  - Input: "a cat" -> Enhanced: "a cat, digital art, soft lighting, highly detailed, photorealistic"
-  - Input: (empty) -> Generated: "A majestic dragon soaring through storm clouds, digital art, cinematic lighting, highly detailed"
-
-### How It Works
-
-The launcher will:
-- Load your configuration settings
-- Prompt you to enter an image generation prompt (or generate one automatically)
-- Enhance your prompt using AI if you provide input, or generate a new one if empty
-- Start the AUTOMATIC1111 WebUI if it's not already running
-- Generate your image using the txt2img API
-- Save the generated image to your specified location
-
-### Requirements
-
-- Go 1.19 or later
-- AUTOMATIC1111 Stable Diffusion WebUI installed
-- Google Gemini API key (for prompt generation)
-
-### Future Enhancement Ideas
-
-- **Prompt History**: Save and recall previously used prompts
-- **Style Presets**: Pre-defined artistic styles (anime, photorealistic, oil painting, etc.)
-- **Batch Generation**: Generate multiple images with variations of the same prompt
-- **Image-to-Prompt**: Analyze existing images to generate similar prompts
-- **Negative Prompt Generation**: AI-generated negative prompts to improve image quality
-- **Model Selection**: Support for different Stable Diffusion models and checkpoints
-- **GUI Interface**: Web-based or desktop GUI for easier interaction
-- **Prompt Templates**: Customizable templates for different image types (portraits, landscapes, etc.)
-- **Quality Scoring**: AI evaluation of generated images with suggestions for improvement
-- **Social Features**: Share prompts and generated images with the community
+A unified toolkit for Stable Diffusion on your own hardware. Run it **headless** from the desktop or via a **browser‑friendly Web GUI**—both now share one code‑base and identical JSON‑driven settings.
 
 ---
-**Troubleshooting:**
-- Ensure all paths in `.env` use double backslashes.
-- The batch file will be launched in its own directory so that relative paths work as expected.
-- Make sure your GEMINI_API_KEY is valid for prompt generation to work.
+
+## ✨ What’s New (July 2025)
+
+| Area             | Added / Changed                                                                                                                                                             |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Desktop CLI**  | • *Automatic* PNG naming in `/output` <br>• Robust error handling (non‑zero exit codes bubble up)                                                                           |
+| **Web GUI**      | • Drag‑and‑drop **`.json` settings** upload <br>• Dropdown recall of uploaded presets <br>• Generates images with a single click (prompt + selected JSON)                   |
+| **Config split** | • `.env` → **system‑level** stuff (paths, model folders, env BATs) <br>• `settings.json` → **generation parameters** (sampler, scheduler, width × height, steps, cfg scale) |
+
+---
+
+## 1. Directory Layout
+
+```text
+project/
+│  README.md          ← you’re here
+│  requirements.txt   ← Python deps for the Web GUI
+│
+├─ backend/           ← Go binary + FastAPI app
+│   ├─ generator.exe  ← built Go binary
+│   ├─ settings.json  ← symlink / copy chosen preset
+│   ├─ output/        ← generated PNGs (auto‑timestamped)
+│   └─ settings/      ← uploaded *.json presets
+│
+└─ auto1111_webapp/   ← simple HTML/CSS/JS front‑end
+```
+
+---
+
+## 2. Installation & Build
+
+### ⚙️ Prerequisites
+
+* **Go 1.21+** (for the CLI generator)
+* **Python 3.10+** (for FastAPI & AUTOMATIC1111)
+* **Stable Diffusion WebUI** (AUTOMATIC1111) cloned locally
+* *Windows users*: `ENVIRONMENT_BAT` & `AUTO1111_BAT` paths configured in `.env`
+
+### 🐍 Python deps (Web GUI)
+
+```bash
+python -m venv venv
+venv\Scripts\activate  # or `source venv/bin/activate`
+pip install -r requirements.txt
+```
+
+`requirements.txt` generated today:
+
+```text
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+```
+
+### 🛠️ Build & Run — Desktop CLI
+
+```bash
+cd backend
+# Build once
+go build -o generator.exe .
+
+# Single image
+./generator.exe --prompt "a cat in space" --settings settings/sample.json
+```
+
+Images appear in `backend/output/`.
+
+### 🌐 Build & Run — Web GUI
+
+```bash
+cd backend
+# 1. build Go binary (same as above)
+# 2. start FastAPI server (reload disabled for Go exe stability)
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+Open [http://localhost:8000/app/](http://localhost:8000/app/) in your browser.
+
+---
+
+## 3. Using the Web GUI
+
+1. **Upload** a `*.json` preset via **Settings → Upload**. The file is saved to `backend/settings/` and instantly appears in the dropdown.
+2. **Select** the preset from the dropdown. Its parameters (sampler, width, etc.) are shown for confirmation.
+3. Type your **prompt** (or leave blank to auto‑enhance) and press **Generate**.
+4. The resulting PNG streams back and is also written to `backend/output/`.
+
+> **Tip:** presets can be version‑controlled. Commit the `settings/` folder to Git for easy sharing.
+
+---
+
+## 4. Roadmap (July 2025)
+
+| Feature                                    | Status                                                                      |
+| ------------------------------------------ | --------------------------------------------------------------------------- |
+| **Prompt History**                         | ✅ Planned – quick recall in GUI                                             |
+| **Style Presets**                          | 🚧 Expanding – now driven by uploaded JSON; will ship with curated defaults |
+| **Negative Prompt Generation**             | ✅ Keeps bad stuff out automatically                                         |
+| **Model Selection**                        | ✅ Current dropdown; will obey `.env` / JSON overrides soon                  |
+| **GUI Interface**                          | 🚧 MVP shipped; polishing UI & auth next                                    |
+| **Prompt Templates (JSON import)**         | ✅ Core to new workflow                                                      |
+| **Social Features** (share prompts / PNGs) | ✅ Still on the slate                                                        |
+
+---
+
+## 5. Troubleshooting
+
+| Symptom                            | Likely Cause                                 | Fix                                                                                                    |
+| ---------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `generator.exe failed: …`          | Invalid JSON (missing comma or wrong key)    | Validate with `jq . settings/your.json`                                                                |
+| Image 512×512 despite bigger width | JSON keys wrong *or* values saved as strings | Keys are `IMAGE_WIDTH/IMAGE_HEIGHT` or `width/height` (caps or lower). Numbers **must not** be quoted. |
+| `No .env file found` from AUTO1111 | Working dir incorrect for the child process  | Confirm `start_auto1111()` sets `cmd.Dir` to `backend/`                                                |
+| PNG missing but no error           | Output path invalid                          | Ensure `output/` exists & that you have write permissions                                              |
+
+---
+
+## 6. FAQ
+
+> **Q:** Do I need both `.env` *and* `settings.json`?
+>
+> **A:** Yes. Think of `.env` as *system settings* (where Python lives, which SD model to load, API keys). `settings.json` is *per‑image parameters* (sampler, size, steps). Separate files keep your secrets out of Git while letting you share artistic presets.
+
+---
+
+© 2025 MIT‑licensed.  Happy rendering! 🚀

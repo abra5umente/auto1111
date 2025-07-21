@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Image Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-900 text-white font-sans p-6">
+    <div class="max-w-xl mx-auto space-y-6">
+        <h1 class="text-3xl font-bold text-center">Image Generator</h1>
+
+        <!-- Upload JSON settings -->
+        <form id="upload-form" class="flex gap-2 items-center">
+            <input type="file" id="settings-file" accept=".json" class="bg-gray-800 p-2 rounded" />
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded">Upload Settings</button>
+        </form>
+
+        <!-- Prompt form -->
+        <form id="prompt-form" class="space-y-4">
+            <input type="text" name="prompt" placeholder="Enter a prompt..." class="w-full p-2 rounded text-black"
+                required />
+
+            <select name="settings_file" id="settings-select" class="w-full p-2 rounded text-black" required>
+                <option value="">Loading settings...</option>
+            </select>
+
+            <button type="submit" class="w-full bg-green-500 hover:bg-green-600 p-2 rounded">Generate Image</button>
+
+            <pre id="settings-preview"
+                class="bg-gray-800 text-green-400 p-4 mt-4 rounded overflow-x-auto max-h-64"></pre>
+        </form>
+
+        <!-- Image preview -->
+        <img id="output-img" src="" class="mx-auto hidden max-w-full rounded border-2 border-white mt-4" />
+        <p id="msg" class="text-red-400 text-center"></p>
+    </div>
+
+    <script>
+        const uploadForm = document.getElementById('upload-form');
+        const promptForm = document.getElementById('prompt-form');
+        const settingsSelect = document.getElementById('settings-select');
+        const settingsPreview = document.getElementById('settings-preview');
+        const outputImg = document.getElementById('output-img');
+        const msg = document.getElementById('msg');
+
+        // Upload .json settings
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const file = document.getElementById('settings-file').files[0];
+            if (!file) return alert('Select a file first!');
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await fetch('/upload_settings', { method: 'POST', body: formData });
+            if (res.ok) {
+                await loadSettings();
+                alert('Settings uploaded!');
+            } else {
+                alert('Failed to upload settings.');
+            }
+        });
+
+        // Submit prompt + selected settings
+        promptForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(promptForm);
+            msg.textContent = 'Generating...';
+
+            const res = await fetch('/generate', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok && res.headers.get("Content-Type")?.includes("image")) {
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                outputImg.src = url;
+                outputImg.classList.remove('hidden');
+                msg.textContent = '';
+            } else {
+                const error = await res.json().catch(() => ({ error: 'Unknown error' }));
+                msg.textContent = `Failed: ${error.error}`;
+                outputImg.classList.add('hidden');
+            }
+        });
+
+        // Load settings into dropdown
+        async function loadSettings() {
+            try {
+                const res = await fetch('/list_settings');
+                const data = await res.json();
+                const files = Array.isArray(data.files) ? data.files : [];
+
+                settingsSelect.innerHTML = '';
+                files.forEach(({ filename }) => {
+                    const option = document.createElement('option');
+                    option.value = filename;
+                    option.textContent = filename.replace(".json", "");
+                    settingsSelect.appendChild(option);
+                });
+
+                if (files.length > 0) {
+                    settingsSelect.value = files[0].filename;
+                    await loadPreview(files[0].filename);
+                }
+
+            } catch (err) {
+                console.error("Failed to load settings:", err);
+            }
+        }
+
+        // Load preview of selected file
+        settingsSelect.addEventListener('change', async (e) => {
+            await loadPreview(e.target.value);
+        });
+
+        async function loadPreview(filename) {
+            try {
+                const res = await fetch(`/get_settings/${encodeURIComponent(filename)}`);
+                const json = await res.json();
+                settingsPreview.textContent = JSON.stringify(json, null, 2);
+                console.log("Applied settings:", json);
+            } catch (err) {
+                console.error("Preview load failed:", err);
+                settingsPreview.textContent = "Error loading preview.";
+            }
+        }
+
+        window.onload = loadSettings;
+    </script>
+</body>
+
+</html>
