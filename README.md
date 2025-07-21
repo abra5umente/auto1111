@@ -102,7 +102,7 @@ Open [http://localhost:8000/app/](http://localhost:8000/app/) in your browser.
 | **Prompt History**                         | ✅ Planned – quick recall in GUI                                             |
 | **Style Presets**                          | 🚧 Expanding – now driven by uploaded JSON; will ship with curated defaults |
 | **Negative Prompt Generation**             | ✅ Keeps bad stuff out automatically                                         |
-| **Model Selection**                        | ✅ Current dropdown; will obey `.env` / JSON overrides soon                  |
+| **Model Selection**                        | ✅ Currently relies on whatever is set in Automatic1111, but will obey `.env` / JSON overrides soon                  |
 | **GUI Interface**                          | 🚧 MVP shipped; polishing UI & auth next                                    |
 | **Prompt Templates (JSON import)**         | ✅ Core to new workflow                                                      |
 | **Social Features** (share prompts / PNGs) | ✅ Still on the slate                                                        |
