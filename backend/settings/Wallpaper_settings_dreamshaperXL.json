@@ -1,0 +1,8 @@
+{
+    "sampler_name": "DPM++ SDE",
+    "scheduler": "Karras",
+    "height": 1152,
+    "width": 2048,
+    "cfg_scale": 2,
+    "steps": 8
+}
