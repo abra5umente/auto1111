@@ -3,6 +3,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from subprocess import run
+import sys
 from uuid import uuid4
 from pathlib import Path
 import json
@@ -67,7 +68,7 @@ async def generate(
     ]
     logger.debug("Running command: %s", " ".join(cmd))
 
-    result = run(cmd, capture_output=True)
+    result = run(cmd, stdout=sys.stdout, stderr=sys.stderr)
     if result.returncode != 0:
         logger.error("generator.exe failed: %s", result.stderr.decode())
         return JSONResponse(status_code=500,

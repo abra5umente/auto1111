@@ -71,7 +71,6 @@ func floatFrom(settings map[string]interface{}, canonical string, fallback float
 	return fallback
 }
 
-// Prefer flag values; fall back to JSON; else default.
 func firstNonEmpty(vals ...string) string {
 	for _, v := range vals {
 		if v != "" {
@@ -99,7 +98,6 @@ func firstNonNeg(vals ...float64) float64 {
 	return 0
 }
 
-// -----------------------------------------------------------------------------
 func main() {
 	// Locate exe directory (so .env & settings.json live beside it)
 	ex, err := os.Executable()
@@ -115,7 +113,6 @@ func main() {
 	promptFlag := flag.String("prompt", "", "Prompt text")
 	outputFlag := flag.String("output", "", "Output PNG path")
 
-	// Optional overrides (can ignore if you want JSON‑only)
 	samplerFlag := flag.String("sampler", "", "Override sampler")
 	schedulerFlag := flag.String("scheduler", "", "Override scheduler")
 	stepsFlag := flag.Int("steps", 0, "Override steps")
@@ -132,7 +129,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Resolve parameters (flags > JSON > defaults)
+	// ---------------- resolve parameters ----------------
 	sampler := firstNonEmpty(*samplerFlag, strFrom(settings, "sampler", "Euler"))
 	scheduler := firstNonEmpty(*schedulerFlag, strFrom(settings, "scheduler", "default"))
 	width := firstNonZero(*widthFlag, intFrom(settings, "width", 512))
@@ -154,15 +151,16 @@ func main() {
 		userPrompt = strings.TrimSpace(userPrompt)
 	}
 
-	if userPrompt == "" {
-		if p, err := generate_prompt(""); err == nil {
-			userPrompt = p
-		}
+	// Prompt enhancement
+	var enhanced string
+	if p, err := generate_prompt(userPrompt); err != nil {
+		fmt.Fprintf(os.Stderr, "[ERROR] prompt enhancement failed: %v\n", err)
+		enhanced = userPrompt
 	} else {
-		if p, err := generate_prompt(userPrompt); err == nil {
-			userPrompt = p
-		}
+		fmt.Fprintf(os.Stderr, "[DEBUG] enhanced prompt: %q\n", p)
+		enhanced = p
 	}
+	userPrompt = enhanced
 
 	// ---------------- payload ----------------
 	payload := map[string]interface{}{
@@ -183,11 +181,8 @@ func main() {
 	if !check_auto1111() {
 		fmt.Println("Starting auto1111…")
 		cmd = start_auto1111()
-		for {
-			time.Sleep(2 * time.Second)
-			if check_auto1111() {
-				break
-			}
+		for !check_auto1111() {
+			time.Sleep(1 * time.Second)
 		}
 	}
 
