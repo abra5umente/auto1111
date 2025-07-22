@@ -33,8 +33,18 @@
         </form>
 
         <!-- Image preview -->
-        <img id="output-img" src="" class="mx-auto hidden max-w-full rounded border-2 border-white mt-4" />
+        <a id="output-link" href="#" target="_blank" class="block hidden">
+            <img id="output-img" src="" class="mx-auto max-w-full rounded border-2 border-white mt-4" />
+        </a>
         <p id="msg" class="text-red-400 text-center"></p>
+
+        <!-- Image History -->
+        <div id="history-container" class="mt-8">
+            <h2 class="text-xl font-bold text-center mb-4">History</h2>
+            <div id="history-grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                <!-- History images will be injected here by JS -->
+            </div>
+        </div>
     </div>
 
     <script>
@@ -42,6 +52,8 @@
         const promptForm = document.getElementById('prompt-form');
         const settingsSelect = document.getElementById('settings-select');
         const settingsPreview = document.getElementById('settings-preview');
+        const historyGrid = document.getElementById('history-grid');
+        const outputLink = document.getElementById('output-link');
         const outputImg = document.getElementById('output-img');
         const msg = document.getElementById('msg');
 
@@ -75,13 +87,15 @@
             if (res.ok && res.headers.get("Content-Type")?.includes("image")) {
                 const blob = await res.blob();
                 const url = URL.createObjectURL(blob);
+                outputLink.href = url;
                 outputImg.src = url;
-                outputImg.classList.remove('hidden');
+                outputLink.classList.remove('hidden');
                 msg.textContent = '';
+                await loadHistory(); // Refresh history after generating a new image
             } else {
                 const error = await res.json().catch(() => ({ error: 'Unknown error' }));
                 msg.textContent = `Failed: ${error.error}`;
-                outputImg.classList.add('hidden');
+                outputLink.classList.add('hidden');
             }
         });
 
@@ -127,7 +141,46 @@
             }
         }
 
-        window.onload = loadSettings;
+        // Load image history
+        async function loadHistory() {
+            try {
+                const res = await fetch('/history');
+                if (!res.ok) throw new Error('Failed to fetch history');
+                const data = await res.json();
+                const files = Array.isArray(data.files) ? data.files : [];
+
+                historyGrid.innerHTML = ''; // Clear previous history
+
+                files.forEach(filename => {
+                    const imgUrl = `/images/${encodeURIComponent(filename)}`;
+
+                    const button = document.createElement('button');
+                    button.className = 'aspect-square bg-gray-800 rounded overflow-hidden hover:ring-2 ring-blue-500 focus:ring-2 focus:outline-none';
+
+                    const img = document.createElement('img');
+                    img.src = imgUrl;
+                    img.className = 'w-full h-full object-cover';
+                    img.alt = `History image ${filename}`;
+                    button.appendChild(img);
+
+                    button.addEventListener('click', () => {
+                        outputImg.src = imgUrl;
+                        outputLink.href = imgUrl;
+                        outputLink.classList.remove('hidden');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                    historyGrid.appendChild(button);
+                });
+            } catch (err) {
+                console.error("Failed to load history:", err);
+                historyGrid.innerHTML = '<p class="text-red-400 col-span-full text-center">Could not load history.</p>';
+            }
+        }
+
+        window.onload = async () => {
+            await loadSettings();
+            await loadHistory();
+        };
     </script>
 </body>
 

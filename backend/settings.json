@@ -1,8 +1,8 @@
 {
-    "SAMPLER_NAME": "DPM++ SDE",
-    "SCHEDULER_NAME": "Karras",
-    "IMAGE_HEIGHT": 1152,
-    "IMAGE_WIDTH": 2048,
-    "CFG_SCALE": 2,
-    "STEPS": 8
+  "sampler_name": "DPM++ SDE",
+  "scheduler": "Karras",
+  "height": 1344,
+  "width": 896,
+  "cfg_scale": 2,
+  "steps": 8
 }

@@ -3,6 +3,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from subprocess import run
+import sys
 from uuid import uuid4
 from pathlib import Path
 import json
@@ -26,6 +27,8 @@ app.include_router(upload_router)
 
 # Mount static files for frontend
 app.mount("/app", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
+# Mount static files for output images
+app.mount("/images", StaticFiles(directory=OUTPUT_DIR), name="images")
 
 # Enable CORS (for dev use)
 app.add_middleware(
@@ -34,6 +37,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/history")
+async def get_history():
+    """Scans the output directory for images and returns a sorted list."""
+    if not OUTPUT_DIR.exists():
+        return {"files": []}
+
+    image_files = [p for p in OUTPUT_DIR.iterdir() if p.suffix.lower() in (".png", ".jpg", ".jpeg")]
+
+    # Sort by modification time, newest first
+    sorted_files = sorted(image_files, key=lambda p: p.stat().st_mtime, reverse=True)
+
+    return {"files": [p.name for p in sorted_files]}
 
 @app.post("/generate")
 async def generate(
@@ -67,7 +83,7 @@ async def generate(
     ]
     logger.debug("Running command: %s", " ".join(cmd))
 
-    result = run(cmd, capture_output=True)
+    result = run(cmd, stdout=sys.stdout, stderr=sys.stderr)
     if result.returncode != 0:
         logger.error("generator.exe failed: %s", result.stderr.decode())
         return JSONResponse(status_code=500,
