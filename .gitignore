@@ -44,8 +44,8 @@ coverage.xml
 Thumbs.db
 
 # images
-.png
-.jpeg
-.jpg
-.gif
-.bmp
+*.png
+*.jpeg
+*.jpg
+*.gif
+*.bmp

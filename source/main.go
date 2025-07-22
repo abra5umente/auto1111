@@ -19,12 +19,12 @@ import (
 // -----------------------------------------------------------------------------
 
 var keyAlias = map[string][]string{
-	"sampler":   {"sampler", "SAMPLER_NAME"},
-	"scheduler": {"scheduler", "SCHEDULER_NAME"},
-	"width":     {"width", "IMAGE_WIDTH"},
-	"height":    {"height", "IMAGE_HEIGHT"},
-	"steps":     {"steps", "STEPS"},
-	"cfg_scale": {"cfg_scale", "CFG_SCALE"},
+	"sampler_name": {"sampler_name", "SAMPLER_NAME"},
+	"scheduler":    {"scheduler", "SCHEDULER_NAME"},
+	"width":        {"width", "IMAGE_WIDTH"},
+	"height":       {"height", "IMAGE_HEIGHT"},
+	"steps":        {"steps", "STEPS"},
+	"cfg_scale":    {"cfg_scale", "CFG_SCALE"},
 }
 
 func lookup(settings map[string]interface{}, canonical string) (interface{}, bool) {
@@ -113,7 +113,7 @@ func main() {
 	promptFlag := flag.String("prompt", "", "Prompt text")
 	outputFlag := flag.String("output", "", "Output PNG path")
 
-	samplerFlag := flag.String("sampler", "", "Override sampler")
+	samplerFlag := flag.String("sampler_name", "", "Override sampler")
 	schedulerFlag := flag.String("scheduler", "", "Override scheduler")
 	stepsFlag := flag.Int("steps", 0, "Override steps")
 	widthFlag := flag.Int("width", 0, "Override width")
@@ -130,7 +130,7 @@ func main() {
 	}
 
 	// ---------------- resolve parameters ----------------
-	sampler := firstNonEmpty(*samplerFlag, strFrom(settings, "sampler", "Euler"))
+	sampler := firstNonEmpty(*samplerFlag, strFrom(settings, "sampler_name", "Euler"))
 	scheduler := firstNonEmpty(*schedulerFlag, strFrom(settings, "scheduler", "default"))
 	width := firstNonZero(*widthFlag, intFrom(settings, "width", 512))
 	height := firstNonZero(*heightFlag, intFrom(settings, "height", 512))
@@ -164,13 +164,13 @@ func main() {
 
 	// ---------------- payload ----------------
 	payload := map[string]interface{}{
-		"prompt":    userPrompt,
-		"sampler":   sampler,
-		"scheduler": scheduler,
-		"width":     width,
-		"height":    height,
-		"steps":     steps,
-		"cfg_scale": cfg,
+		"prompt":       userPrompt,
+		"sampler_name": sampler,
+		"scheduler":    scheduler,
+		"width":        width,
+		"height":       height,
+		"steps":        steps,
+		"cfg_scale":    cfg,
 	}
 	if *outputFlag != "" {
 		payload["output"] = *outputFlag
